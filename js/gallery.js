@@ -1,4 +1,6 @@
-const catalogUrl = 'data/galeria.json';
+import { siteUrl } from './site-paths.js?v=20261103-media-paths1';
+
+const catalogUrl = siteUrl('data/galeria.json');
 const categoryLabels = {
   all: 'Todos los momentos',
   inauguracion: 'Inauguraci\u00f3n',
@@ -28,7 +30,7 @@ function formatMeta(item) {
 
 function safeImage(image, alt) {
   const img = document.createElement('img');
-  img.src = image;
+  img.src = siteUrl(image);
   img.alt = alt || '';
   img.loading = 'lazy';
   img.decoding = 'async';
@@ -38,7 +40,7 @@ function safeImage(image, alt) {
 function safeMedia(item) {
   if (item.type !== 'video') return safeImage(item.thumbnail || item.image, item.alt);
   const video = document.createElement('video');
-  video.src = item.thumbnail || item.image;
+  video.src = siteUrl(item.thumbnail || item.image);
   video.muted = true;
   video.playsInline = true;
   video.preload = 'metadata';
@@ -79,7 +81,7 @@ function initGallery(items) {
     if (dialogImage) {
       dialogImage.hidden = isVideo;
       if (!isVideo) {
-        dialogImage.src = item.image;
+        dialogImage.src = siteUrl(item.image);
         dialogImage.alt = item.alt || item.title || '';
       }
     }
@@ -87,7 +89,7 @@ function initGallery(items) {
       dialogVideo.pause();
       dialogVideo.hidden = !isVideo;
       if (isVideo) {
-        dialogVideo.src = item.image;
+        dialogVideo.src = siteUrl(item.image);
         dialogVideo.load();
       } else {
         dialogVideo.removeAttribute('src');

@@ -1,5 +1,10 @@
 AddDefaultCharset UTF-8
 
+# Explicit media types for Apache-based hosting. GitHub Pages supplies these
+# independently, but this keeps the MP4/WebM video portable to shared hosting.
+AddType video/mp4 .mp4 .MP4
+AddType video/webm .webm .WebM
+
 ErrorDocument 404 /404.html
 
 # Only public, static assets are cached. HTML and application/API responses

@@ -1,0 +1,8 @@
+/* Fallback assets referenced from CSS must resolve relative to css/. */
+.video-announcement.has-video-error .video-announcement-media {
+  background-image: url("../assets/hero-impulso-uaemex-2026-desktop.png");
+}
+
+.hero-media {
+  background-image: url("../assets/hero-impulso-uaemex-2026-desktop.png");
+}

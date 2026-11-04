@@ -2,6 +2,7 @@ import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from './config.js?v=20260921-4
 import { listActivities } from './activities.js?v=20261002-2';
 import { element, scenarioName } from './route-ui.js?v=20260921-4';
 import { addToLocalRoute, getLocalRoute, hasLocalRouteItem, removeFromLocalRoute } from './local-route.js?v=20261103-1';
+import { siteUrl } from './site-paths.js?v=20261103-media-paths1';
 
 const target=document.querySelector('#speakersDynamic');
 const filters=document.querySelector('#speakerFilters');
@@ -39,7 +40,7 @@ function orderedParticipations(participations){
 function activityTypeLabel(type){return activityTypeLabels[type]||String(type||'').trim().toLocaleUpperCase('es-MX');}
 function relativePhotoPath(path){const value=String(path||'').trim().replace(/\\/g,'/');return !value||value.startsWith('/')||value.split('/').some(part=>!part||part==='.'||part==='..')?null:value;}
 function encodedPhotoPath(path){return path.split('/').map(encodeURIComponent).join('/');}
-function photoUrls(path){const relativePath=relativePhotoPath(path);if(!relativePath)return null;const encodedPath=encodedPhotoPath(relativePath);return {hosted:`/imagenes/ponentes/${encodedPath}?v=20261103-speaker-photos`,legacy:`${SUPABASE_URL}/storage/v1/object/public/speaker-photos/${encodedPath}`};}
+function photoUrls(path){const relativePath=relativePhotoPath(path);if(!relativePath)return null;const encodedPath=encodedPhotoPath(relativePath);return {hosted:`${siteUrl(`imagenes/ponentes/${encodedPath}`)}?v=20261103-speaker-photos`,legacy:`${SUPABASE_URL}/storage/v1/object/public/speaker-photos/${encodedPath}`};}
 function loadSpeakerPhoto(image,path){const urls=photoUrls(path);if(!urls){image.src=placeholderSvg;return;}image.dataset.speakerPhotoFallback=urls.legacy;image.src=urls.hosted;image.onerror=()=>{const fallback=image.dataset.speakerPhotoFallback;if(fallback){delete image.dataset.speakerPhotoFallback;image.src=fallback;return;}image.onerror=null;image.src=placeholderSvg;};}
 function dateLabel(date){if(!date)return null;const parsed=new Date(`${date}T12:00:00`);return Number.isNaN(parsed.valueOf())?null:new Intl.DateTimeFormat('es-MX',{day:'numeric',month:'long',year:'numeric'}).format(parsed);}
 function timeLabel(activity){const start=activity?.start_time?.slice(0,5),end=activity?.end_time?.slice(0,5);return start&&end?`${start} – ${end}`:start?`${start} · fin por confirmar`:end?`inicio por confirmar · ${end}`:null;}
