@@ -15,6 +15,13 @@ let activitiesBySlug=new Map();
 let activeStage='all';
 
 function normalize(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();}
+function slideSpeakerPanel(details){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const panel=[...details.children].find(child=>child.matches('.speakers-grid,.content-note'));
+  if(!panel)return;
+  panel.classList.remove('speaker-dropdown-slide-in');void panel.offsetWidth;panel.classList.add('speaker-dropdown-slide-in');
+  panel.addEventListener('animationend',()=>panel.classList.remove('speaker-dropdown-slide-in'),{once:true});
+}
 function activityScheduleKey(activity){
   return [activity?.activity_date||'9999-12-31',activity?.start_time||'99:99:99',normalize(activity?.title)].join('|');
 }
@@ -81,7 +88,7 @@ function activityOnlyCard(activity){
 }
 function applyFilters(){
   const query=normalize(filters?.querySelector('input')?.value);let visible=0;
-  target?.querySelectorAll('.speaker-group').forEach(group=>{const stageMatch=activeStage==='all'||group.dataset.scenario===activeStage;let groupVisible=0;group.querySelectorAll('.speaker').forEach(card=>{const cardStageMatch=group.dataset.unassigned==='true'?(activeStage==='all'||card.dataset.scenario===activeStage):stageMatch;const match=cardStageMatch&&(!query||card.dataset.search.includes(query));card.hidden=!match;if(match)groupVisible++;});group.hidden=!groupVisible;if(groupVisible&&(activeStage!=='all'||query))group.open=true;if(groupVisible)visible+=groupVisible;});
+  target?.querySelectorAll('.speaker-group').forEach(group=>{const stageMatch=activeStage==='all'||group.dataset.scenario===activeStage;let groupVisible=0;group.querySelectorAll('.speaker').forEach(card=>{const cardStageMatch=group.dataset.unassigned==='true'?(activeStage==='all'||card.dataset.scenario===activeStage):stageMatch;const match=cardStageMatch&&(!query||card.dataset.search.includes(query));card.hidden=!match;if(match)groupVisible++;});group.hidden=!groupVisible;if(activeStage!=='all')group.open=group.dataset.scenario===activeStage&&Boolean(groupVisible);if(groupVisible)visible+=groupVisible;});
   const status=filters?.querySelector('[data-speaker-results]');if(status)status.textContent=visible?`${visible} ${visible===1?'ponente disponible':'ponentes disponibles'}`:'No hay ponentes con esos filtros.';
   filters?.querySelectorAll('[data-speaker-stage]').forEach(button=>{const active=button.dataset.speakerStage===activeStage;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
 }
@@ -96,10 +103,10 @@ function renderRoute(){
   routePanel.append(heading,count,status,list);target?.querySelectorAll('[data-route-slug]').forEach(button=>{const selected=hasLocalRouteItem(button.dataset.routeSlug);button.textContent=selected?'QUITAR DE MI RUTA':'+ AGREGAR A MI RUTA';button.setAttribute('aria-pressed',String(selected));});
 }
 function render(groups){
-  if(!target)return;target.replaceChildren();for(const [index,group] of (groups||[]).entries()){const details=element('details',undefined,'speaker-group');details.dataset.scenario=group.scenario;details.open=index===0;const summary=element('summary');summary.append(element('span',String(group.position).padStart(2,'0'),'group-index'),element('h3',group.label||scenarioNames[group.scenario]),element('span','+','group-action'));details.append(summary);details.addEventListener('toggle',()=>{if(!details.open||activeStage!=='all'||filters?.querySelector('input')?.value)return;target.querySelectorAll('.speaker-group[open]').forEach(other=>{if(other!==details)other.open=false;});});if(!group.speakers?.length)details.append(element('p','Ponentes por confirmar.','content-note'));else{const grid=element('div',undefined,'speakers-grid');orderedSpeakers(group.speakers).forEach(speaker=>grid.append(speakerCard(speaker,group.scenario)));details.append(grid);}target.append(details);}
+  if(!target)return;const hasPreviousGroups=Boolean(target.querySelector('.speaker-group'));const openDetails=target.querySelector('.speaker-group[open]');const openGroupKey=openDetails?(openDetails.dataset.unassigned==='true'?'unassigned':openDetails.dataset.scenario):null;target.replaceChildren();for(const [index,group] of (groups||[]).entries()){const details=element('details',undefined,'speaker-group');details.dataset.scenario=group.scenario;details.open=hasPreviousGroups?openGroupKey===group.scenario: index===0;const summary=element('summary');summary.append(element('span',String(group.position).padStart(2,'0'),'group-index'),element('h3',group.label||scenarioNames[group.scenario]),element('span','+','group-action'));details.append(summary);details.addEventListener('toggle',()=>{if(!details.open){details.querySelectorAll('.speaker-dropdown-slide-in').forEach(panel=>panel.classList.remove('speaker-dropdown-slide-in'));return;}target.querySelectorAll('.speaker-group[open]').forEach(other=>{if(other!==details)other.open=false;});slideSpeakerPanel(details);});if(!group.speakers?.length)details.append(element('p','Ponentes por confirmar.','content-note'));else{const grid=element('div',undefined,'speakers-grid');orderedSpeakers(group.speakers).forEach(speaker=>grid.append(speakerCard(speaker,group.scenario)));details.append(grid);}target.append(details);}
   const assigned=new Set((groups||[]).flatMap(group=>(group.speakers||[]).flatMap(speaker=>(speaker.participations||[]).map(item=>item.slug))).filter(Boolean));
   const unassigned=[...activitiesBySlug.values()].filter(activity=>activity.status==='open'&&!assigned.has(activity.slug));
-  if(unassigned.length){const details=element('details',undefined,'speaker-group speaker-unassigned-group');details.dataset.unassigned='true';const summary=element('summary');summary.append(element('span','—','group-index'),element('h3','ACTIVIDADES SIN PONENTE CONFIRMADO'),element('span','+','group-action'));details.append(summary);const grid=element('div',undefined,'speakers-grid');orderedActivities(unassigned).forEach(activity=>grid.append(activityOnlyCard(activity)));details.append(grid);target.append(details);}
+  if(unassigned.length){const details=element('details',undefined,'speaker-group speaker-unassigned-group');details.dataset.unassigned='true';details.open=hasPreviousGroups&&openGroupKey==='unassigned';const summary=element('summary');summary.append(element('span','—','group-index'),element('h3','ACTIVIDADES SIN PONENTE CONFIRMADO'),element('span','+','group-action'));details.append(summary);const grid=element('div',undefined,'speakers-grid');orderedActivities(unassigned).forEach(activity=>grid.append(activityOnlyCard(activity)));details.append(grid);details.addEventListener('toggle',()=>{if(!details.open){details.querySelectorAll('.speaker-dropdown-slide-in').forEach(panel=>panel.classList.remove('speaker-dropdown-slide-in'));return;}target.querySelectorAll('.speaker-group[open]').forEach(other=>{if(other!==details)other.open=false;});});target.append(details);}
   applyFilters();renderRoute();
 }
 export function listPublicSpeakers(){

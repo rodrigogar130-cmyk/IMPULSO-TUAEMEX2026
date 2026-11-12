@@ -1177,6 +1177,9 @@
     .speaker-group{ border-top:1px solid var(--border); }
     .speaker-group:last-child{ border-bottom:1px solid var(--border); }
     .speaker-group > summary{ display:flex; align-items:center; gap:24px; padding:26px 0; list-style:none; cursor:pointer; }
+    .speaker-dropdown-slide-in{ animation:speaker-dropdown-slide .36s cubic-bezier(.2,.7,.25,1) both; }
+    @keyframes speaker-dropdown-slide{ from{ opacity:0; transform:translateY(-24px); } to{ opacity:1; transform:translateY(0); } }
+    @media(prefers-reduced-motion:reduce){ .speaker-dropdown-slide-in{ animation:none; } }
     .speaker-group h3{ margin:0; font-size:clamp(20px,2.5vw,30px); font-weight:500; letter-spacing:-.03em; }
     .group-index{ font-size:12px; font-variant-numeric:tabular-nums; color:var(--text-secondary); }
     .group-action{ margin-left:auto; }
@@ -1963,7 +1966,7 @@
 <script type="module" src="js/section-navigation.js?v=20261112-layout-stability2"></script>
 <script type="module" src="js/agenda-loader.js?v=20261002-2"></script>
   <script type="module" src="js/gallery.js?v=20261103-media-paths1"></script>
-  <script type="module" src="js/speakers.js?v=20261103-speaker-photos1"></script>
+  <script type="module" src="js/speakers.js?v=20261112-speaker-slide1"></script>
   <script type="module" src="js/public-stats.js?v=20261030-perf1"></script>
   <dialog class="map-dialog" id="map-dialog" role="dialog" aria-modal="true" aria-label="Mapa ampliado de Ciudad Universitaria UAEMéx">
     <div class="map-dialog-toolbar">
