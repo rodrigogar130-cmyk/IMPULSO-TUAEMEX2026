@@ -43,18 +43,20 @@
     }
     @supports (content-visibility:auto){
       #evento,#pasaporte,#escenarios,#ponentes,#agenda,#mapa{content-visibility:auto;contain-intrinsic-size:auto 1000px;}
-      #evento{contain-intrinsic-size:auto 1800px;}
-      #escenarios{contain-intrinsic-size:auto 3300px;}
-      #ponentes{contain-intrinsic-size:auto 3600px;}
+      #evento{contain-intrinsic-size:auto 2200px;}
+      #pasaporte{contain-intrinsic-size:auto 1150px;}
+      #escenarios{contain-intrinsic-size:auto 1750px;}
+      #ponentes{contain-intrinsic-size:auto 1750px;}
+      #mapa{contain-intrinsic-size:auto 1750px;}
       #agenda{contain-intrinsic-size:auto 1600px;}
       #evento:target,#pasaporte:target,#escenarios:target,#ponentes:target,#agenda:target,#mapa:target,
       #evento:focus-within,#pasaporte:focus-within,#escenarios:focus-within,#ponentes:focus-within,#agenda:focus-within,#mapa:focus-within,
       #evento:has(:target),#evento:has(details[open]),#escenarios:has(details[open]),#ponentes:has(details[open]){content-visibility:visible;}
       @media (max-width:820px){
-        #evento{contain-intrinsic-size:auto 2300px;}
-        #pasaporte{contain-intrinsic-size:auto 1100px;}
-        #escenarios{contain-intrinsic-size:auto 6200px;}
-        #ponentes{contain-intrinsic-size:auto 6500px;}
+        #evento{contain-intrinsic-size:auto 2700px;}
+        #pasaporte{contain-intrinsic-size:auto 1150px;}
+        #escenarios{contain-intrinsic-size:auto 5700px;}
+        #ponentes{contain-intrinsic-size:auto 1750px;}
         #agenda{contain-intrinsic-size:auto 2600px;}
         #mapa{contain-intrinsic-size:auto 1700px;}
       }
@@ -1958,7 +1960,7 @@
   <script src="vendor/supabase-js-2.57.4/supabase.js?v=20260921-4"></script>
 <script type="module" src="js/site-header.js?v=20261103-speakers-agenda"></script>
   <script type="module" src="js/navbar-auth.js?v=20261030-perf1"></script>
-<script type="module" src="js/section-navigation.js?v=20261002-2"></script>
+<script type="module" src="js/section-navigation.js?v=20261112-layout-stability2"></script>
 <script type="module" src="js/agenda-loader.js?v=20261002-2"></script>
   <script type="module" src="js/gallery.js?v=20261103-media-paths1"></script>
   <script type="module" src="js/speakers.js?v=20261103-speaker-photos1"></script>

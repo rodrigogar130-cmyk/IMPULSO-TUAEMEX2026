@@ -1,5 +1,7 @@
 const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
 let navigationFrame=0;
+let cancelScrollSettle=null;
+let correctionFrames=[];
 
 function targetFromHash(hash){
  if(!hash||hash==='#')return null;
@@ -20,20 +22,49 @@ function sameDocumentHash(link){
 }
 function reveal(target){
  const section=target.closest?.('section[id]')||target;
- if(section?.style)section.style.contentVisibility='visible';
+ const sections=[...document.querySelectorAll('main > section[id]')];
+ const sectionIndex=sections.indexOf(section);
+ if(sectionIndex>=0)sections.slice(0,sectionIndex+1).forEach(item=>{item.style.contentVisibility='visible';});
+ else if(section?.style)section.style.contentVisibility='visible';
  if(target.id==='agenda'){
   document.getElementById('agendaDisclosure')?.setAttribute('open','');
   document.dispatchEvent(new CustomEvent('impulso:section-open',{detail:'agenda'}));
  }
 }
+function watchScrollSettle(target,headerOffset){
+ let timer=0,active=true;
+ const cleanup=()=>{
+  if(!active)return;
+  active=false;clearTimeout(timer);
+  window.removeEventListener('scroll',onScroll);
+  window.removeEventListener('scrollend',settle);
+  if(cancelScrollSettle===cleanup)cancelScrollSettle=null;
+ };
+ const settle=()=>{
+  cleanup();
+  correctionFrames.push(requestAnimationFrame(()=>correctionFrames.push(requestAnimationFrame(()=>{
+   correctionFrames=[];
+   const correction=target.getBoundingClientRect().top-headerOffset;
+   if(Math.abs(correction)>2)window.scrollBy({top:correction,behavior:'auto'});
+  }))));
+ };
+ const onScroll=()=>{clearTimeout(timer);timer=setTimeout(settle,150);};
+ window.addEventListener('scroll',onScroll,{passive:true});
+ window.addEventListener('scrollend',settle,{once:true});
+ timer=setTimeout(settle,1800);
+ cancelScrollSettle=cleanup;
+}
 function slideTo(target,behavior){
  cancelAnimationFrame(navigationFrame);
+ cancelScrollSettle?.();
+ correctionFrames.forEach(cancelAnimationFrame);correctionFrames=[];
  reveal(target);
  navigationFrame=requestAnimationFrame(()=>{
   // content-visibility needs one layout frame before measuring the final offset.
   navigationFrame=requestAnimationFrame(()=>{
    const headerOffset=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-offset'))||92;
    const top=Math.max(0,window.scrollY+target.getBoundingClientRect().top-headerOffset);
+   if(Math.abs(top-window.scrollY)>2)watchScrollSettle(target,headerOffset);
    window.scrollTo({top,behavior});
    if(target.matches('section,[tabindex]')){
     target.setAttribute('tabindex','-1');
