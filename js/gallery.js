@@ -40,7 +40,8 @@ function safeImage(image, alt) {
 function safeMedia(item) {
   if (item.type !== 'video') return safeImage(item.thumbnail || item.image, item.alt);
   const video = document.createElement('video');
-  video.src = siteUrl(item.thumbnail || item.image);
+  video.src = siteUrl(item.image);
+  if (item.thumbnail && item.thumbnail !== item.image) video.poster = siteUrl(item.thumbnail);
   video.muted = true;
   video.playsInline = true;
   video.preload = 'metadata';
